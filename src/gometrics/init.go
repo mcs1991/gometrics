@@ -255,6 +255,10 @@ func (e *Flags) init() {
 	logfile := flag.String("L", "none", "Print to Logfile.")
 	logfile_by_day := flag.Bool("logfile_by_day", false, "One day a logfile,the suffix of logfile is 'yyyy-mm-dd';")
 
+	flag.Usage = func() {
+		Helpinfo()
+	}
+
 	flag.Parse()
 
 	e.interval = *interval
@@ -297,9 +301,7 @@ func (e *Flags) init() {
 
 		os.Exit(1)
 	}
-	flag.Usage = func() {
-		Helpinfo()
-	}
+
 }
 
 func GetValue() map[string]interface{} {
@@ -358,19 +360,19 @@ func Helpinfo() {
 	fmt.Printf("-n     Print net info\n")
 	fmt.Printf("\nMySQL metrics:\n")
 	fmt.Printf("-com   Print MySQL Status(Com_select,Com_insert,Com_update,Com_delete)\n")
-	fmt.Printf("-hit   Print Innodb Hit%\n")
-	fmt.Printf("-innodb_rows     Print Innodb Rows Status(Innodb_rows_inserted/updated/deleted/read)\n")
-	fmt.Printf("-innodb_pages    Print Innodb Buffer Pool Pages Status(Innodb_buffer_pool_pages_data/free/dirty/flushed)\n")
-	fmt.Printf("-innodb_data     Print Innodb Data Status(Innodb_data_reads/writes/read/written)\n")
-	fmt.Printf("-innodb_log      Print Innodb Log Status(Innodb_os_log_fsyncs/written)\n")
-	fmt.Printf("-innodb_status   Print Innodb Status from Command: 'Show Engine Innodb Status'\n")
+	fmt.Printf("-hit   Print Innodb Hit\n")
 	fmt.Printf("-T     Print Threads Status(Threads_running,Threads_connected,Threads_created,Threads_cached)\n")
 	fmt.Printf("-rt    Print tcprstat info\n")
 	fmt.Printf("-B     Print Bytes received from/send to MySQL(Bytes_received,Bytes_sent)\n")
 	fmt.Printf("-semi  Semisynchronous monitoring info\n")
 	fmt.Printf("-slave Print Slave info\n")
+	fmt.Printf("-innodb_rows     Print Innodb Rows Status(Innodb_rows_inserted/updated/deleted/read)\n")
+	fmt.Printf("-innodb_pages    Print Innodb Buffer Pool Pages Status(Innodb_buffer_pool_pages_data/free/dirty/flushed)\n")
+	fmt.Printf("-innodb_data     Print Innodb Data Status(Innodb_data_reads/writes/read/written)\n")
+	fmt.Printf("-innodb_log      Print Innodb Log Status(Innodb_os_log_fsyncs/written)\n")
+	fmt.Printf("-innodb_status   Print Innodb Status from Command: 'Show Engine Innodb Status'\n")
 	fmt.Printf("\n Gometrics options:\n")
-	fmt.Printf("-i     Time interval(Default 1)")
+	fmt.Printf("-i     Time interval(Default 1)\n")
 	fmt.Printf("-C     Gometrics run time\n")
 	fmt.Printf("-t     Print current time\n")
 	fmt.Printf("-nocolor         Do not display color\n")
