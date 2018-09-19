@@ -41,7 +41,7 @@
     -innodb_log      Print Innodb Log Status(Innodb_os_log_fsyncs/written)
     -innodb_status   Print Innodb Status from Command: 'Show Engine Innodb Status'
 
-     Gometrics options:
+    Gometrics options:
     -i     			 Time interval(Default 1)
 	-C     			 Gometrics run time
     -t     			 Print current time
@@ -49,7 +49,7 @@
     -L     			 Print to Logfile
     -logfile_by_day  One day a logfile,the suffix of logfile is 'yyyy-mm-dd'
     
-     Lazy command:
+    Lazy command:
     -mysql           Print MySQLInfo (include -t,-com,-hit,-T,-B)
     -innodb          Print InnodbInfo(include -t,-innodb_pages,-innodb_data,-innodb_log,-innodb_status)
     -sys   			 Print SysInfo (include -t,-l,-c,-s)
