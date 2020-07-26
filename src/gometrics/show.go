@@ -54,24 +54,24 @@ func ShowData(flag_info map[string]interface{}, first Basic, second Basic, count
 			pic += ShowFont(" max_connect_errors", purple, "", "", "") + "[" + second.var_max_connect_errors + "]" + ShowFont(" max_connections", purple, "", "", "") + "[" + second.var_max_connections + "]" + ShowFont(" max_user_connections", purple, "", "", "") + "[" + second.var_max_user_connections + "]" + ShowFont(" max_used_connections", purple, "", "", "") + "[" + tmp_used + "]" + "\n"
 			pic += ShowFont(" open_files_limit", purple, "", "", "") + "[" + second.var_open_files_limit + "]" + ShowFont(" table_definition_cache", purple, "", "", "") + "[" + second.var_table_definition_cache + "]" + ShowFont(" Aborted_connects", purple, "", "", "") + "[" + second.Aborted_connects + "]" + ShowFont(" Aborted_clients", purple, "", "", "") + "[" + second.Aborted_clients + "]" + "\n"
 			pic += ShowFont(" Binlog_cache_disk_use", purple, "", "", "") + "[" + second.Binlog_cache_disk_use + "]" + ShowFont(" Select_scan", purple, "", "", "") + "[" + second.Select_scan + "]" + ShowFont(" Select_full_join", purple, "", "", "") + "[" + second.Select_full_join + "]" + ShowFont(" Slow_queries", purple, "", "", "") + "[" + second.Slow_queries + "]\n"
-			if second.Rpl_semi_sync_master_status != "" {
-				pic += ShowFont(" Rpl_semi_sync_master_status", purple, "", "", "") + "[" + second.Rpl_semi_sync_master_status + "]" + ShowFont(" Rpl_semi_sync_slave_status", purple, "", "", "") + "[" + second.Rpl_semi_sync_slave_status + "]" + ShowFont(" rpl_semi_sync_master_timeout", purple, "", "", "") + "[" + second.rpl_semi_sync_master_timeout + "]\n"
+			if second.Rpl_semi_sync_main_status != "" {
+				pic += ShowFont(" Rpl_semi_sync_main_status", purple, "", "", "") + "[" + second.Rpl_semi_sync_main_status + "]" + ShowFont(" Rpl_semi_sync_subordinate_status", purple, "", "", "") + "[" + second.Rpl_semi_sync_subordinate_status + "]" + ShowFont(" rpl_semi_sync_main_timeout", purple, "", "", "") + "[" + second.rpl_semi_sync_main_timeout + "]\n"
 			}
-			if second.Master_Host != "" {
-				pic += ShowFont(" Master_Host", purple, "", "", "") + "[" + second.Master_Host + "]" + ShowFont(" Master_User", purple, "", "", "") + "[" + second.Master_User + "]" + ShowFont(" Master_Port", purple, "", "", "") + "[" + second.Master_Port + "]" + ShowFont(" Master_Server_Id", purple, "", "", "") + "[" + second.Master_Server_Id + "]\n"
+			if second.Main_Host != "" {
+				pic += ShowFont(" Main_Host", purple, "", "", "") + "[" + second.Main_Host + "]" + ShowFont(" Main_User", purple, "", "", "") + "[" + second.Main_User + "]" + ShowFont(" Main_Port", purple, "", "", "") + "[" + second.Main_Port + "]" + ShowFont(" Main_Server_Id", purple, "", "", "") + "[" + second.Main_Server_Id + "]\n"
 				io := ""
 				sql := ""
-				if second.Slave_IO_Running != "Yes" {
+				if second.Subordinate_IO_Running != "Yes" {
 					io = ShowFont("No", red, "", "", "y")
 				} else {
 					io = ShowFont("Yes", green, "", "", "")
 				}
-				if second.Slave_SQL_Running != "Yes" {
+				if second.Subordinate_SQL_Running != "Yes" {
 					sql = ShowFont("No", red, "", "", "y")
 				} else {
 					sql = ShowFont("Yes", green, "", "", "")
 				}
-				pic += ShowFont(" Slave_IO_Running", purple, "", "", "") + "[" + io + "]" + ShowFont(" Slave_SQL_Running", purple, "", "", "") + "[" + sql + "]\n"
+				pic += ShowFont(" Subordinate_IO_Running", purple, "", "", "") + "[" + io + "]" + ShowFont(" Subordinate_SQL_Running", purple, "", "", "") + "[" + sql + "]\n"
 			}
 			pic += ShowFont(" table_open_cache", purple, "", "", "") + "[" + second.var_table_open_cache + "]" + ShowFont(" thread_cache_size", purple, "", "", "") + "[" + second.var_thread_cache_size + "]" + ShowFont(" Opened_tables", purple, "", "", "") + "[" + second.Opened_tables + "]" + ShowFont(" Created_tmp_disk_tables_ratio", purple, "", "", "") + "[" + tmptable + "]\n\n"
 
@@ -649,71 +649,71 @@ func ShowData(flag_info map[string]interface{}, first Basic, second Basic, count
 	}
 
 	//semi
-	//tx:master等待事务的平均时间（微秒）
-	//notx:slave未成功确认的提交数
-	//yestx:slave成功确认的提交数
-	//notime:master关闭半同步复制的次数
+	//tx:main等待事务的平均时间（微秒）
+	//notx:subordinate未成功确认的提交数
+	//yestx:subordinate成功确认的提交数
+	//notime:main关闭半同步复制的次数
 	if flag_info["semi"] == true && mysql_switch == "on" {
 		title_summit += ShowFont("--avg_wait---tx_times--semi|", green, blue, "", "")
 		title_detail += ShowFont("   tx   notx  yestx  notime|", green, "", "y", "")
 		if count == 0 {
 			data_detail += ShowFont(" 100ms 1000 1000 1000", "", "", "", "") + ShowFont("|", green, "", "", "")
 		} else {
-			// fmt.Printf("1 %d 2 %d 3 %d 4 %d 5 %d", second.Rpl_semi_sync_master_net_avg_wait_time, second.Rpl_semi_sync_master_tx_avg_wait_time, second.Rpl_semi_sync_master_no_tx, second.Rpl_semi_sync_master_yes_tx, second.Rpl_semi_sync_master_no_times)
+			// fmt.Printf("1 %d 2 %d 3 %d 4 %d 5 %d", second.Rpl_semi_sync_main_net_avg_wait_time, second.Rpl_semi_sync_main_tx_avg_wait_time, second.Rpl_semi_sync_main_no_tx, second.Rpl_semi_sync_main_yes_tx, second.Rpl_semi_sync_main_no_times)
 			/*该参数已废弃
-			if second.Rpl_semi_sync_master_net_avg_wait_time < 1000 {
-				data_detail += ShowFont(strings.Repeat(" ", 3-len(strconv.Itoa(second.Rpl_semi_sync_master_net_avg_wait_time)))+strconv.Itoa(second.Rpl_semi_sync_master_net_avg_wait_time)+"us", "", "", "", "")
-			} else if second.Rpl_semi_sync_master_net_avg_wait_time >= 1000 && second.Rpl_semi_sync_master_net_avg_wait_time/1000/1000 <= 1 {
-				data_detail += ShowFont(strings.Repeat(" ", 3-len(strconv.Itoa(second.Rpl_semi_sync_master_net_avg_wait_time/1000)))+strconv.Itoa(second.Rpl_semi_sync_master_net_avg_wait_time/1000)+"ms", "", "", "", "")
-			} else if second.Rpl_semi_sync_master_net_avg_wait_time/1000/1000 > 1 {
-				data_detail += ShowFont(strings.Repeat(" ", 4-len(strconv.Itoa(second.Rpl_semi_sync_master_net_avg_wait_time/1000/1000)))+strconv.Itoa(second.Rpl_semi_sync_master_net_avg_wait_time/1000/1000)+"s", red, "", "", "y")
+			if second.Rpl_semi_sync_main_net_avg_wait_time < 1000 {
+				data_detail += ShowFont(strings.Repeat(" ", 3-len(strconv.Itoa(second.Rpl_semi_sync_main_net_avg_wait_time)))+strconv.Itoa(second.Rpl_semi_sync_main_net_avg_wait_time)+"us", "", "", "", "")
+			} else if second.Rpl_semi_sync_main_net_avg_wait_time >= 1000 && second.Rpl_semi_sync_main_net_avg_wait_time/1000/1000 <= 1 {
+				data_detail += ShowFont(strings.Repeat(" ", 3-len(strconv.Itoa(second.Rpl_semi_sync_main_net_avg_wait_time/1000)))+strconv.Itoa(second.Rpl_semi_sync_main_net_avg_wait_time/1000)+"ms", "", "", "", "")
+			} else if second.Rpl_semi_sync_main_net_avg_wait_time/1000/1000 > 1 {
+				data_detail += ShowFont(strings.Repeat(" ", 4-len(strconv.Itoa(second.Rpl_semi_sync_main_net_avg_wait_time/1000/1000)))+strconv.Itoa(second.Rpl_semi_sync_main_net_avg_wait_time/1000/1000)+"s", red, "", "", "y")
 			}
 			*/
-			if second.Rpl_semi_sync_master_tx_avg_wait_time < 1000 {
-				data_detail += ShowFont(strings.Repeat(" ", 4-len(strconv.Itoa(second.Rpl_semi_sync_master_tx_avg_wait_time)))+strconv.Itoa(second.Rpl_semi_sync_master_tx_avg_wait_time)+"us", "", "", "", "")
-			} else if second.Rpl_semi_sync_master_tx_avg_wait_time > 1000 && second.Rpl_semi_sync_master_tx_avg_wait_time/1000/1000 <= 1 {
-				data_detail += ShowFont(strings.Repeat(" ", 4-len(strconv.Itoa(second.Rpl_semi_sync_master_tx_avg_wait_time/1000)))+strconv.Itoa(second.Rpl_semi_sync_master_tx_avg_wait_time/1000)+"ms", "", "", "", "")
-			} else if second.Rpl_semi_sync_master_tx_avg_wait_time/1000/1000 > 1 {
-				data_detail += ShowFont(strings.Repeat(" ", 5-len(strconv.Itoa(second.Rpl_semi_sync_master_tx_avg_wait_time/1000/1000)))+strconv.Itoa(second.Rpl_semi_sync_master_tx_avg_wait_time/1000/1000)+"s", red, "", "", "y")
+			if second.Rpl_semi_sync_main_tx_avg_wait_time < 1000 {
+				data_detail += ShowFont(strings.Repeat(" ", 4-len(strconv.Itoa(second.Rpl_semi_sync_main_tx_avg_wait_time)))+strconv.Itoa(second.Rpl_semi_sync_main_tx_avg_wait_time)+"us", "", "", "", "")
+			} else if second.Rpl_semi_sync_main_tx_avg_wait_time > 1000 && second.Rpl_semi_sync_main_tx_avg_wait_time/1000/1000 <= 1 {
+				data_detail += ShowFont(strings.Repeat(" ", 4-len(strconv.Itoa(second.Rpl_semi_sync_main_tx_avg_wait_time/1000)))+strconv.Itoa(second.Rpl_semi_sync_main_tx_avg_wait_time/1000)+"ms", "", "", "", "")
+			} else if second.Rpl_semi_sync_main_tx_avg_wait_time/1000/1000 > 1 {
+				data_detail += ShowFont(strings.Repeat(" ", 5-len(strconv.Itoa(second.Rpl_semi_sync_main_tx_avg_wait_time/1000/1000)))+strconv.Itoa(second.Rpl_semi_sync_main_tx_avg_wait_time/1000/1000)+"s", red, "", "", "y")
 			}
 
-			if second.Rpl_semi_sync_master_no_tx > 1 {
-				data_detail += ShowFont(strings.Repeat(" ", 5-len(strconv.Itoa(second.Rpl_semi_sync_master_no_tx)))+strconv.Itoa(second.Rpl_semi_sync_master_no_tx), red, "", "", "y")
+			if second.Rpl_semi_sync_main_no_tx > 1 {
+				data_detail += ShowFont(strings.Repeat(" ", 5-len(strconv.Itoa(second.Rpl_semi_sync_main_no_tx)))+strconv.Itoa(second.Rpl_semi_sync_main_no_tx), red, "", "", "y")
 			} else {
-				data_detail += ShowFont(strings.Repeat(" ", 5-len(strconv.Itoa(second.Rpl_semi_sync_master_no_tx)))+strconv.Itoa(second.Rpl_semi_sync_master_no_tx), "", "", "", "y")
+				data_detail += ShowFont(strings.Repeat(" ", 5-len(strconv.Itoa(second.Rpl_semi_sync_main_no_tx)))+strconv.Itoa(second.Rpl_semi_sync_main_no_tx), "", "", "", "y")
 			}
 
-			data_detail += ShowFont(strings.Repeat(" ", 6-len(ChangeUntils(second.Rpl_semi_sync_master_yes_tx)))+ChangeUntils(second.Rpl_semi_sync_master_yes_tx), "", "", "", "y")
+			data_detail += ShowFont(strings.Repeat(" ", 6-len(ChangeUntils(second.Rpl_semi_sync_main_yes_tx)))+ChangeUntils(second.Rpl_semi_sync_main_yes_tx), "", "", "", "y")
 
-			if second.Rpl_semi_sync_master_no_times > 1 {
-				data_detail += ShowFont(strings.Repeat(" ", 10-len(strconv.Itoa(second.Rpl_semi_sync_master_no_times)))+strconv.Itoa(second.Rpl_semi_sync_master_no_times), red, "", "", "y")
+			if second.Rpl_semi_sync_main_no_times > 1 {
+				data_detail += ShowFont(strings.Repeat(" ", 10-len(strconv.Itoa(second.Rpl_semi_sync_main_no_times)))+strconv.Itoa(second.Rpl_semi_sync_main_no_times), red, "", "", "y")
 			} else {
-				data_detail += ShowFont(strings.Repeat(" ", 10-len(strconv.Itoa(second.Rpl_semi_sync_master_no_times)))+strconv.Itoa(second.Rpl_semi_sync_master_no_times), "", "", "", "y")
+				data_detail += ShowFont(strings.Repeat(" ", 10-len(strconv.Itoa(second.Rpl_semi_sync_main_no_times)))+strconv.Itoa(second.Rpl_semi_sync_main_no_times), "", "", "", "y")
 			}
 			data_detail += ShowFont("|", green, "", "", "")
 		}
 	}
 
 	//threads ------threads------
-	if flag_info["slave"] == true && mysql_switch == "on" {
-		title_summit += ShowFont("-------------SlaveStatus-----------|", green, blue, "", "")
+	if flag_info["subordinate"] == true && mysql_switch == "on" {
+		title_summit += ShowFont("-------------SubordinateStatus-----------|", green, blue, "", "")
 		title_detail += ShowFont("  ReadMLP   ExecMLP   chkRE   SecBM|", green, "", "y", "")
 		if count == 0 {
 			data_detail += ShowFont(" 1066312331 1066312331 6312331 6312331", "", "", "", "") + ShowFont("|", green, "", "", "")
 		} else {
 
-			checkNum := second.Read_Master_Log_Pos - second.Exec_Master_Log_Pos
+			checkNum := second.Read_Main_Log_Pos - second.Exec_Main_Log_Pos
 
-			data_detail += ShowFont(strings.Repeat(" ", 6-len(strconv.Itoa(second.Read_Master_Log_Pos)))+strconv.Itoa(second.Read_Master_Log_Pos), "", "", "", "")
+			data_detail += ShowFont(strings.Repeat(" ", 6-len(strconv.Itoa(second.Read_Main_Log_Pos)))+strconv.Itoa(second.Read_Main_Log_Pos), "", "", "", "")
 
-			data_detail += ShowFont(strings.Repeat(" ", 11-len(strconv.Itoa(second.Exec_Master_Log_Pos)))+strconv.Itoa(second.Exec_Master_Log_Pos), "", "", "", "")
+			data_detail += ShowFont(strings.Repeat(" ", 11-len(strconv.Itoa(second.Exec_Main_Log_Pos)))+strconv.Itoa(second.Exec_Main_Log_Pos), "", "", "", "")
 
 			data_detail += ShowFont(strings.Repeat(" ", 10-len(strconv.Itoa(checkNum)))+strconv.Itoa(checkNum), "", "", "", "")
 
-			if second.Seconds_Behind_Master > 300 {
-				data_detail += ShowFont(strings.Repeat(" ", 8-len(strconv.Itoa(second.Seconds_Behind_Master)))+strconv.Itoa(second.Seconds_Behind_Master), red, "", "", "")
+			if second.Seconds_Behind_Main > 300 {
+				data_detail += ShowFont(strings.Repeat(" ", 8-len(strconv.Itoa(second.Seconds_Behind_Main)))+strconv.Itoa(second.Seconds_Behind_Main), red, "", "", "")
 			} else {
-				data_detail += ShowFont(strings.Repeat(" ", 8-len(strconv.Itoa(second.Seconds_Behind_Master)))+strconv.Itoa(second.Seconds_Behind_Master), green, "", "", "")
+				data_detail += ShowFont(strings.Repeat(" ", 8-len(strconv.Itoa(second.Seconds_Behind_Main)))+strconv.Itoa(second.Seconds_Behind_Main), green, "", "", "")
 			}
 
 			data_detail += ShowFont("|", green, "", "", "")

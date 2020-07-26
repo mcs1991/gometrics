@@ -157,25 +157,25 @@ type Basic struct {
 	Key_writes int
 	Select_scan string
 	//半同步
-	Rpl_semi_sync_master_net_avg_wait_time int
-	Rpl_semi_sync_master_no_times int
-	Rpl_semi_sync_master_no_tx int
-	Rpl_semi_sync_master_status string
-	Rpl_semi_sync_master_tx_avg_wait_time int
-	Rpl_semi_sync_master_wait_sessions int
-	Rpl_semi_sync_master_yes_tx int
-	Rpl_semi_sync_slave_status string
-	rpl_semi_sync_master_timeout string
-	//Slave状态监控
-	Master_Host string
-	Master_User string
-	Master_Port string
-	Slave_IO_Running string
-	Slave_SQL_Running string
-	Master_Server_Id string
-	Seconds_Behind_Master int
-	Read_Master_Log_Pos int
-	Exec_Master_Log_Pos int
+	Rpl_semi_sync_main_net_avg_wait_time int
+	Rpl_semi_sync_main_no_times int
+	Rpl_semi_sync_main_no_tx int
+	Rpl_semi_sync_main_status string
+	Rpl_semi_sync_main_tx_avg_wait_time int
+	Rpl_semi_sync_main_wait_sessions int
+	Rpl_semi_sync_main_yes_tx int
+	Rpl_semi_sync_subordinate_status string
+	rpl_semi_sync_main_timeout string
+	//Subordinate状态监控
+	Main_Host string
+	Main_User string
+	Main_Port string
+	Subordinate_IO_Running string
+	Subordinate_SQL_Running string
+	Main_Server_Id string
+	Seconds_Behind_Main int
+	Read_Main_Log_Pos int
+	Exec_Main_Log_Pos int
 }
 
 // type mysql struct {
@@ -191,7 +191,7 @@ type Flags struct {
 	swap bool //打印swap info
 	disk string //打印Disk info
 	net string // 打印net info
-	slave bool // 打印slave info
+	subordinate bool // 打印subordinate info
 	username string //mysql用户名
 	password string //mysql密码
 	host string //mysql连接主机
@@ -231,7 +231,7 @@ func (e *Flags) init() {
 	swap := flag.Bool("s", false, "Print swap info")
 	disk := flag.String("d", "none", "Print disk info")
 	net := flag.String("n", "none", "Print net info")
-	slave := flag.Bool("slave", false, "Print Slave info")
+	subordinate := flag.Bool("subordinate", false, "Print Subordinate info")
 	username := flag.String("u", "", "MySQL user")
 	password := flag.String("p", "", "MySQL password")
 	host := flag.String("H", "127.0.0.1", "MySQL host")
@@ -270,7 +270,7 @@ func (e *Flags) init() {
 	e.swap = *swap
 	e.disk = *disk
 	e.net = *net
-	e.slave = *slave
+	e.subordinate = *subordinate
 	e.username = *username
 	e.password = *password
 	e.host = *host
@@ -317,7 +317,7 @@ func GetValue() map[string]interface{} {
 		"swap": u.swap,
 		"disk": u.disk,
 		"net": u.net,
-		"slave": u.slave,
+		"subordinate": u.subordinate,
 		"username": u.username,
 		"password": u.password,
 		"host": u.host,
@@ -365,7 +365,7 @@ func Helpinfo() {
 	fmt.Printf("-rt    Print tcprstat info\n")
 	fmt.Printf("-B     Print Bytes received from/send to MySQL(Bytes_received,Bytes_sent)\n")
 	fmt.Printf("-semi  Semisynchronous monitoring info\n")
-	fmt.Printf("-slave Print Slave info\n")
+	fmt.Printf("-subordinate Print Subordinate info\n")
 	fmt.Printf("-innodb_rows     Print Innodb Rows Status(Innodb_rows_inserted/updated/deleted/read)\n")
 	fmt.Printf("-innodb_pages    Print Innodb Buffer Pool Pages Status(Innodb_buffer_pool_pages_data/free/dirty/flushed)\n")
 	fmt.Printf("-innodb_data     Print Innodb Data Status(Innodb_data_reads/writes/read/written)\n")

@@ -86,14 +86,14 @@ func CreateCommand(info map[string]interface{}, count int,mysql_switch string) B
 			ss.var_innodb_flush_method = innodb_flush_method_string
 
 			//semi
-			semi_tmp := "mysql -u" + info["username"].(string) + " -p" + info["password"].(string) + " --host=" + info["host"].(string) + " --socket=" + info["socket"].(string) + " --port=" + info["port"].(string) + " -e 'show variables'|grep -E -w 'rpl_semi_sync_master_timeout'|awk '{print $2}'"
+			semi_tmp := "mysql -u" + info["username"].(string) + " -p" + info["password"].(string) + " --host=" + info["host"].(string) + " --socket=" + info["socket"].(string) + " --port=" + info["port"].(string) + " -e 'show variables'|grep -E -w 'rpl_semi_sync_main_timeout'|awk '{print $2}'"
 			semi_string := ExecCommand(semi_tmp)
 			semi_string = strings.Replace(semi_string, "\n", "", -1)
 
-			ss.rpl_semi_sync_master_timeout = semi_string
+			ss.rpl_semi_sync_main_timeout = semi_string
 
 			//mysql global status
-			innodb_cmd := "mysql -u" + info["username"].(string) + " -p" + info["password"].(string) + " --host=" + info["host"].(string) + " --socket=" + info["socket"].(string) + " --port=" + info["port"].(string) + " -e 'show global status'|grep -w -E 'Max_used_connections|Aborted_connects|Aborted_clients|Select_full_join|Binlog_cache_disk_use|Binlog_cache_use|Opened_tables|Connections|Qcache_hits|Handler_read_first|Handler_read_key|Handler_read_next|Handler_read_prev|Handler_read_rnd|Handler_read_rnd_next|Handler_rollback|Created_tmp_tables|Created_tmp_disk_tables|Slow_queries|Key_read_requests|Key_reads|Key_write_requests|Key_writes|Select_scan|Rpl_semi_sync_master_status|Rpl_semi_sync_slave_status'|awk '{print $2}'|xargs echo|sed 's/[[:space:]]/,/g'"
+			innodb_cmd := "mysql -u" + info["username"].(string) + " -p" + info["password"].(string) + " --host=" + info["host"].(string) + " --socket=" + info["socket"].(string) + " --port=" + info["port"].(string) + " -e 'show global status'|grep -w -E 'Max_used_connections|Aborted_connects|Aborted_clients|Select_full_join|Binlog_cache_disk_use|Binlog_cache_use|Opened_tables|Connections|Qcache_hits|Handler_read_first|Handler_read_key|Handler_read_next|Handler_read_prev|Handler_read_rnd|Handler_read_rnd_next|Handler_rollback|Created_tmp_tables|Created_tmp_disk_tables|Slow_queries|Key_read_requests|Key_reads|Key_write_requests|Key_writes|Select_scan|Rpl_semi_sync_main_status|Rpl_semi_sync_subordinate_status'|awk '{print $2}'|xargs echo|sed 's/[[:space:]]/,/g'"
 
 			innodb_string := ExecCommand(innodb_cmd)
 			innodb_string = strings.Replace(innodb_string, "\n", "", -1)
@@ -123,8 +123,8 @@ func CreateCommand(info map[string]interface{}, count int,mysql_switch string) B
 			ss.Opened_tables = innodb_result[19]
 			ss.Qcache_hits, _ = strconv.Atoi(innodb_result[20])
 			if lens == 26 {
-				ss.Rpl_semi_sync_master_status = innodb_result[21]
-				ss.Rpl_semi_sync_slave_status = innodb_result[22]
+				ss.Rpl_semi_sync_main_status = innodb_result[21]
+				ss.Rpl_semi_sync_subordinate_status = innodb_result[22]
 				ss.Select_full_join = innodb_result[23]
 				ss.Select_scan = innodb_result[24]
 				ss.Slow_queries = innodb_result[25]
@@ -134,19 +134,19 @@ func CreateCommand(info map[string]interface{}, count int,mysql_switch string) B
 				ss.Slow_queries = innodb_result[23]
 			}
 
-			slave_cmd := "mysql -u" + info["username"].(string) + " -p" + info["password"].(string) + " --host=" + info["host"].(string) + " --socket=" + info["socket"].(string) + " --port=" + info["port"].(string) + " -e 'show slave status\\G'|grep -E -w 'Master_Host|Master_User|Master_Port|Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master|Master_Server_Id|Read_Master_Log_Pos|Exec_Master_Log_Pos'|awk '{print $2}'|xargs echo|sed 's/[[:space:]]/,/g'"
-			slave_string := ExecCommand(slave_cmd)
-			slave_string = strings.Replace(slave_string, "\n", "", -1)
-			slave_result := strings.Split(slave_string, ",")
-			if slave_result[0] == "" {
-				ss.Master_Host = ""
+			subordinate_cmd := "mysql -u" + info["username"].(string) + " -p" + info["password"].(string) + " --host=" + info["host"].(string) + " --socket=" + info["socket"].(string) + " --port=" + info["port"].(string) + " -e 'show subordinate status\\G'|grep -E -w 'Main_Host|Main_User|Main_Port|Subordinate_IO_Running|Subordinate_SQL_Running|Seconds_Behind_Main|Main_Server_Id|Read_Main_Log_Pos|Exec_Main_Log_Pos'|awk '{print $2}'|xargs echo|sed 's/[[:space:]]/,/g'"
+			subordinate_string := ExecCommand(subordinate_cmd)
+			subordinate_string = strings.Replace(subordinate_string, "\n", "", -1)
+			subordinate_result := strings.Split(subordinate_string, ",")
+			if subordinate_result[0] == "" {
+				ss.Main_Host = ""
 			} else {
-				ss.Master_Host = slave_result[0]
-				ss.Master_User = slave_result[1]
-				ss.Master_Port = slave_result[2]
-				ss.Slave_IO_Running = slave_result[4]
-				ss.Slave_SQL_Running = slave_result[5]
-				ss.Master_Server_Id = slave_result[8]
+				ss.Main_Host = subordinate_result[0]
+				ss.Main_User = subordinate_result[1]
+				ss.Main_Port = subordinate_result[2]
+				ss.Subordinate_IO_Running = subordinate_result[4]
+				ss.Subordinate_SQL_Running = subordinate_result[5]
+				ss.Main_Server_Id = subordinate_result[8]
 			}
 			// fmt.Println(semi_cmd)
 			// fmt.Println(semi_result)
@@ -324,37 +324,37 @@ func CreateCommand(info map[string]interface{}, count int,mysql_switch string) B
 			}
 			// fmt.Println(semi_cmd)
 			// fmt.Println(semi_result)
-			ss.Rpl_semi_sync_master_net_avg_wait_time, _ = strconv.Atoi(semi_result[1])
-			ss.Rpl_semi_sync_master_no_times, _ = strconv.Atoi(semi_result[4])
-			ss.Rpl_semi_sync_master_no_tx, _ = strconv.Atoi(semi_result[5])
-			// ss.Rpl_semi_sync_master_status = semi_result[6]
-			ss.Rpl_semi_sync_master_tx_avg_wait_time, _ = strconv.Atoi(semi_result[8])
-			ss.Rpl_semi_sync_master_wait_sessions, _ = strconv.Atoi(semi_result[12])
-			ss.Rpl_semi_sync_master_yes_tx, _ = strconv.Atoi(semi_result[13])
-			// ss.Rpl_semi_sync_slave_status = semi_result[14]
+			ss.Rpl_semi_sync_main_net_avg_wait_time, _ = strconv.Atoi(semi_result[1])
+			ss.Rpl_semi_sync_main_no_times, _ = strconv.Atoi(semi_result[4])
+			ss.Rpl_semi_sync_main_no_tx, _ = strconv.Atoi(semi_result[5])
+			// ss.Rpl_semi_sync_main_status = semi_result[6]
+			ss.Rpl_semi_sync_main_tx_avg_wait_time, _ = strconv.Atoi(semi_result[8])
+			ss.Rpl_semi_sync_main_wait_sessions, _ = strconv.Atoi(semi_result[12])
+			ss.Rpl_semi_sync_main_yes_tx, _ = strconv.Atoi(semi_result[13])
+			// ss.Rpl_semi_sync_subordinate_status = semi_result[14]
 		}
 
-		// slave status
-		if info["slave"] == true {
-			slave_cmd := "mysql -u" + info["username"].(string) + " -p" + info["password"].(string) + " --host=" + info["host"].(string) + " --socket=" + info["socket"].(string) + " --port=" + info["port"].(string) + " -e 'show slave status\\G'|grep -E -w 'Master_Host|Master_User|Master_Port|Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master|Master_Server_Id|Read_Master_Log_Pos|Exec_Master_Log_Pos'|awk '{print $2}'|xargs echo|sed 's/[[:space:]]/,/g'"
-			slave_string := ExecCommand(slave_cmd)
-			slave_string = strings.Replace(slave_string, "\n", "", -1)
-			slave_result := strings.Split(slave_string, ",")
-			if slave_result[0] == "" {
-				fmt.Println(ShowFont("该主机Mysql不是Slave端", red, "", "", "y"))
+		// subordinate status
+		if info["subordinate"] == true {
+			subordinate_cmd := "mysql -u" + info["username"].(string) + " -p" + info["password"].(string) + " --host=" + info["host"].(string) + " --socket=" + info["socket"].(string) + " --port=" + info["port"].(string) + " -e 'show subordinate status\\G'|grep -E -w 'Main_Host|Main_User|Main_Port|Subordinate_IO_Running|Subordinate_SQL_Running|Seconds_Behind_Main|Main_Server_Id|Read_Main_Log_Pos|Exec_Main_Log_Pos'|awk '{print $2}'|xargs echo|sed 's/[[:space:]]/,/g'"
+			subordinate_string := ExecCommand(subordinate_cmd)
+			subordinate_string = strings.Replace(subordinate_string, "\n", "", -1)
+			subordinate_result := strings.Split(subordinate_string, ",")
+			if subordinate_result[0] == "" {
+				fmt.Println(ShowFont("该主机Mysql不是Subordinate端", red, "", "", "y"))
 				os.Exit(1)
 			}
 			// fmt.Println(semi_cmd)
 			// fmt.Println(semi_result)
-			// ss.Master_Host = slave_result[0]
-			// ss.Master_User = slave_result[1]
-			// ss.Master_Port = slave_result[2]
-			ss.Read_Master_Log_Pos, _ = strconv.Atoi(slave_result[3])
-			// ss.Slave_IO_Running = slave_result[4]
-			// ss.Slave_SQL_Running = slave_result[5]
-			ss.Exec_Master_Log_Pos, _ = strconv.Atoi(slave_result[6])
-			ss.Seconds_Behind_Master, _ = strconv.Atoi(slave_result[7])
-			// ss.Master_Server_Id = slave_result[8]
+			// ss.Main_Host = subordinate_result[0]
+			// ss.Main_User = subordinate_result[1]
+			// ss.Main_Port = subordinate_result[2]
+			ss.Read_Main_Log_Pos, _ = strconv.Atoi(subordinate_result[3])
+			// ss.Subordinate_IO_Running = subordinate_result[4]
+			// ss.Subordinate_SQL_Running = subordinate_result[5]
+			ss.Exec_Main_Log_Pos, _ = strconv.Atoi(subordinate_result[6])
+			ss.Seconds_Behind_Main, _ = strconv.Atoi(subordinate_result[7])
+			// ss.Main_Server_Id = subordinate_result[8]
 		}
 	}
 	return ss
